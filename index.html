@@ -1,0 +1,3847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusPro - Student Productivity Suite</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <style>/* Modal Styles */
+
+
+:root {
+            --primary-color: #4a90e2;
+            --secondary-color: #6c63ff;
+            --background-gradient: linear-gradient(135deg, #1a1a2e, #16213e);
+            --text-color: #ffffff;
+            --accent-color: #00ff88;
+            --card-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .main-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--accent-color);
+            color: #1a1a2e;
+        }
+
+        .dashboard {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            background: var(--accent-color);
+            color: #1a1a2e;
+        }
+
+        @media (max-width: 768px) {
+            .app {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .main-nav {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal.hidden {
+            display: none;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        /* Task Styles */
+        .task-item {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: move;
+            position: relative;
+            border: 2px solid transparent;
+        }
+        
+        .task-item.dragging {
+            opacity: 0.5;
+            border-color: var(--accent-color);
+        }
+        
+        .task-priority {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            border-radius: 4px 0 0 4px;
+        }
+        
+        .task-priority.high { background-color: #ff4444; }
+        .task-priority.medium { background-color: #ffbb33; }
+        .task-priority.low { background-color: #00C851; }
+        
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .task-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .task-actions button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+        }
+        
+        .task-actions button:hover {
+            background-color: var(--bg-hover);
+        }
+        
+        /* Note Styles */
+        .notes-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            height: calc(100vh - 200px);
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+        }
+        
+        .notes-sidebar {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .notes-search {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        
+        .notes-search input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+        
+        .notes-search input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .notes-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        
+        .note-item {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .note-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .note-item.active {
+            background: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+        }
+        
+        .note-item h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+            color: var(--text-color);
+        }
+        
+        .note-item p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: rgb(255, 255, 255);
+        }
+        
+        .notes-editor {
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .editor-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        
+        .toolbar-spacer {
+            flex: 1;
+        }
+        
+        .editor-toolbar .primary-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+        }
+        
+        .editor-toolbar .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+        
+        .editor-toolbar .primary-btn i {
+            font-size: 0.9rem;
+        }
+        
+        .note-content {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            line-height: 1.6;
+            overflow-y: auto;
+        }
+        
+        .note-content:focus {
+            outline: none;
+            background: rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Custom scrollbar for notes */
+        .notes-list::-webkit-scrollbar,
+        .note-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .notes-list::-webkit-scrollbar-track,
+        .note-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        .notes-list::-webkit-scrollbar-thumb,
+        .note-content::-webkit-scrollbar-thumb {
+            background: rgb(255, 255, 255);
+            border-radius: 3px;
+        }
+        
+        .notes-list::-webkit-scrollbar-thumb:hover,
+        .note-content::-webkit-scrollbar-thumb:hover {
+            background: rgb(255, 255, 255);
+        }
+        
+        /* Calendar Styles */
+        .calendar-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--bg-secondary);
+            border-radius: 1rem;
+        }
+        
+        .calendar-header {
+            margin-bottom: 2rem;
+        }
+        
+        .calendar-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 1.5rem;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+        }
+        
+        .today-info, .year-info {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .today-info span:first-child,
+        .year-info span:first-child {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .highlight {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.2rem;
+            padding: 0.25rem 0.5rem;
+            background-color: var(--bg-hover);
+            border-radius: 4px;
+            margin-left: 0.25rem;
+        }
+        
+        .month-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+        
+        .month-navigation h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .icon-btn:hover {
+            background-color: var(--bg-hover);
+            transform: translateY(-2px);
+        }
+        
+        .calendar-grid {
+            margin-bottom: 2rem;
+        }
+        
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        
+        .calendar-dates {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .calendar-date {
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .calendar-date:hover:not(.empty) {
+            background-color: var(--bg-hover);
+        }
+        
+        .calendar-date.today {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .calendar-date.selected {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .calendar-date.empty {
+            cursor: default;
+        }
+        
+        .event-indicator {
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+        }
+        
+        .calendar-events {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .events-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .events-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .add-event-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .add-event-btn:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        /* Timer Styles */
+        .progress-ring {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 2rem auto;
+        }
+        
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            stroke: var(--accent-color);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+        }
+        
+        .timer-controls {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .circle-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .circle-btn:hover {
+            background-color: var(--bg-hover);
+        }
+        
+        .timer-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .quote {
+            margin-top: 2rem;
+            text-align: center;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+        
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+        
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #6c63ff;
+            --background-gradient: linear-gradient(135deg, #1a1a2e, #16213e);
+            --text-color: #ffffff;
+            --accent-color: #00ff88;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+        
+        /* Cool gradient animation background */
+        .app::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(76, 0, 255, 0.1), transparent);
+            animation: pulse 15s ease-in-out infinite;
+            z-index: -1;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        
+        .primary-btn, .secondary-btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .primary-btn {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: var(--shadow);
+        }
+        
+        .secondary-btn {
+            background: var(--card-bg);
+            color: var(--text-color);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .primary-btn:hover, .secondary-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .primary-btn:active, .secondary-btn:active {
+            transform: translateY(1px);
+        }
+        
+        /* Cool button effect */
+        .primary-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: 0.5s;
+        }
+        
+        .primary-btn:hover::before {
+            left: 100%;
+        }
+        
+        /* Timer styling */
+        .timer-container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow);
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        #timer {
+            font-size: 4rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+        
+        .quote {
+            font-style: italic;
+            margin: 1rem 0;
+            opacity: 0.8;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .control-btn {
+            width: 120px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        /* Settings Styles */
+        .settings-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+        }
+        
+        .preset-times, .custom-time, .sound-settings {
+            margin-bottom: 2rem;
+        }
+        
+        h3 {
+            margin-bottom: 1rem;
+        }
+        
+        .time-preset {
+            width: 100px;
+            margin: 0.5rem;
+            padding: 10px;
+        }
+        
+        input[type="number"], select {
+            width: 200px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        /* History Styles */
+        .history-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .history-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+        }
+        
+        /* Animations */
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+            }
+            100% {
+                text-shadow: 0 0 20px rgba(74, 144, 226, 0.6);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .app {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .button-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .primary-btn, .secondary-btn {
+                width: 100%;
+            }
+        }
+        
+        /* Page transitions */
+        .page {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        
+        .page.hidden {
+            display: none;
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        /* Task Container Styles */
+        .task-container {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow);
+        }
+        
+        .task-container h2 {
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+        
+        #taskInput {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .task-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+        }
+        
+        /* Timer Controls */
+        .timer-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .circle-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .circle-btn:hover {
+            background: var(--accent-color);
+            transform: scale(1.1);
+        }
+        
+        .timer-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        /* Progress Ring */
+        .progress-ring {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 2rem auto;
+        }
+        
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            stroke: var(--accent-color);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+        }
+        
+        /* Stats Container */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow);
+        }
+        
+        .stat-card i {
+            font-size: 2rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+        
+        .stat-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card p {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+        
+        /* Settings Styles */
+        .settings-container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow);
+        }
+        
+        .setting-item {
+            margin-bottom: 1.5rem;
+        }
+        
+        .setting-item label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .setting-item input[type="checkbox"] {
+            display: none;
+        }
+        
+        .toggle-slider {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: var(--text-color);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="checkbox"]:checked + .toggle-slider {
+            background: var(--accent-color);
+        }
+        
+        input[type="checkbox"]:checked + .toggle-slider::before {
+            transform: translateX(24px);
+        }
+        
+        .setting-item input[type="number"] {
+            width: 80px;
+            padding: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+        
+        /* History List */
+        .history-list {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+        }
+        
+        .icon-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: var(--card-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow);
+        }
+        
+        .icon-btn:hover {
+            background: var(--accent-color);
+            transform: scale(1.1);
+        }
+        
+        /* Main Navigation */
+        .main-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 15px;
+            backdrop-filter: blur(8px);
+        }
+        
+        .nav-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-btn i {
+            font-size: 1.1rem;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-btn.active {
+            background: var(--accent-color);
+            color: #1a1a2e;
+        }
+        
+        /* Dashboard */
+        .dashboard {
+            display: grid;
+            gap: 2rem;
+        }
+        
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .action-btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            background: var(--accent-color);
+            color: #1a1a2e;
+        }
+        
+        .upcoming-events {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(8px);
+        }
+        
+        /* Tasks Page */
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .tasks-filters {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 20px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover {
+            background: var(--accent-color);
+            color: #1a1a2e;
+        }
+        
+        .filter-btn.active {
+            background: var(--accent-color);
+            color: #1a1a2e;
+        }
+        
+        .task-lists {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            align-items: start;
+        }
+        
+        .task-column {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(8px);
+        }
+        
+        .task-column h3 {
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+        
+        .task-list {
+            min-height: 200px;
+        }
+        
+        /* Notes Page */
+        .notes-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            height: calc(100vh - 200px);
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+        }
+        
+        .notes-sidebar {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .notes-search {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        
+        .notes-search input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+        
+        .notes-search input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .notes-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        
+        .note-item {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .note-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .note-item.active {
+            background: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+        }
+        
+        .note-item h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+            color: var(--text-color);
+        }
+        
+        .note-item p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .notes-editor {
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .editor-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        
+        .toolbar-spacer {
+            flex: 1;
+        }
+        
+        .editor-toolbar .primary-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+        }
+        
+        .editor-toolbar .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+        
+        .editor-toolbar .primary-btn i {
+            font-size: 0.9rem;
+        }
+        
+        .note-content {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            line-height: 1.6;
+            overflow-y: auto;
+        }
+        
+        .note-content:focus {
+            outline: none;
+            background: rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Custom scrollbar for notes */
+        .notes-list::-webkit-scrollbar,
+        .note-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .notes-list::-webkit-scrollbar-track,
+        .note-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        .notes-list::-webkit-scrollbar-thumb,
+        .note-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        
+        .notes-list::-webkit-scrollbar-thumb:hover,
+        .note-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Calendar Page */
+        .calendar-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+        
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .calendar-grid {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(8px);
+        }
+        
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .calendar-dates {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .calendar-date {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .calendar-date:hover {
+            background-color: var(--bg-hover);
+        }
+        
+        .calendar-date.today {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .calendar-date.selected {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .calendar-date.empty {
+            cursor: default;
+        }
+        
+        .calendar-date .event-indicator {
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+        }
+        
+        .calendar-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+        }
+        
+        .today-info, .year-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .highlight {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-left: 0.25rem;
+        }
+        
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: var(--background-gradient);
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            backdrop-filter: blur(16px);
+            box-shadow: var(--shadow);
+        }
+        
+        .modal-content h2 {
+            margin-bottom: 1.5rem;
+            color: var(--accent-color);
+        }
+        
+        .modal-content form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .modal-content input,
+        .modal-content textarea,
+        .modal-content select {
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+        }
+        
+        .modal-content textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        /* Study Session */
+        .study-session {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+            backdrop-filter: blur(8px);
+        }
+        
+        .subject-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .subject-selector select {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+        }
+        
+        .study-notes textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            resize: vertical;
+        }
+        
+        /* Mode Selector */
+        .study-mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .mode-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 20px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mode-btn:hover {
+            background: var(--accent-color);
+            color: #1a1a2e;
+        }
+        
+        .mode-btn.active {
+            background: var(--accent-color);
+            color: #1a1a2e;
+        }
+        
+        /* Music Player Styles */
+        .music-player {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 0 auto 15px;
+        }
+        
+        .music-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .music-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+        
+        .now-playing {
+            color: var(--text-secondary);
+            font-size: 12px;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .music-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .music-select {
+            display: none; /* Hidden by default, shown when files are added */
+        }
+        
+        .music-select.has-files {
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .player-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .main-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .main-controls .icon-btn {
+            padding: 8px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .main-controls .icon-btn:hover {
+            background: var(--primary-color);
+            color: var(--bg-primary);
+        }
+        
+        .progress-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .progress-bar {
+            flex-grow: 1;
+            position: relative;
+        }
+        
+        #seekBar {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border-color);
+            appearance: none;
+            outline: none;
+        }
+        
+        #seekBar::-webkit-slider-thumb {
+            appearance: none;
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .volume-control i {
+            color: var(--text-primary);
+            font-size: 14px;
+            width: 15px;
+        }
+        
+        #volumeSlider {
+            flex-grow: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border-color);
+            appearance: none;
+            outline: none;
+        }
+        
+        #volumeSlider::-webkit-slider-thumb {
+            appearance: none;
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        /* File input styles */
+        .file-input-container {
+            margin-bottom: 10px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--primary-color);
+            color: var(--bg-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .file-input-label:hover {
+            background: var(--accent-color);
+        }
+        
+        .file-input-label i {
+            font-size: 16px;
+        }
+        </style>
+    <div class="app">
+        <header>
+            <h1>FocusPro</h1>
+            <p class="tagline">Your All-in-One Student Productivity Suite</p>
+        </header>
+
+        <nav class="main-nav">
+            <button class="nav-btn active" data-page="homePage"><i class="fas fa-home"></i> Home</button>
+            <button class="nav-btn" data-page="tasksPage"><i class="fas fa-tasks"></i> Tasks</button>
+            <button class="nav-btn" data-page="focusPage"><i class="fas fa-clock"></i> Focus</button>
+            <button class="nav-btn" data-page="notesPage"><i class="fas fa-sticky-note"></i> Notes</button>
+            <button class="nav-btn" data-page="calendarPage"><i class="fas fa-calendar"></i> Calendar</button>
+        </nav>
+
+        <main>
+            <!-- Home Page -->
+            <div class="page" id="homePage">
+                <div class="dashboard">
+                    <div class="quick-stats">
+                        <div class="stat-card">
+                            <i class="fas fa-tasks"></i>
+                            <h3>Tasks Due Today</h3>
+                            <p id="todayTaskCount">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-clock"></i>
+                            <h3>Study Time Today</h3>
+                            <p id="todayStudyTime">0h 0m</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-fire"></i>
+                            <h3>Study Streak</h3>
+                            <p id="studyStreak">0 days</p>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <button class="action-btn" id="quickAddTask">
+                            <i class="fas fa-plus"></i> Quick Add Task
+                        </button>
+                        <button class="action-btn" id="startStudySession">
+                            <i class="fas fa-play"></i> Start Studying
+                        </button>
+                        <button class="action-btn" id="reviewNotes">
+                            <i class="fas fa-book"></i> Review Notes
+                        </button>
+                    </div>
+
+                    <div class="upcoming-events">
+                        <h2>Upcoming</h2>
+                        <div id="upcomingList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Page -->
+            <div class="page hidden" id="tasksPage">
+                <div class="tasks-header">
+                    <div class="tasks-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="homework">Homework</button>
+                        <button class="filter-btn" data-filter="exam">Exams</button>
+                        <button class="filter-btn" data-filter="project">Projects</button>
+                        <button class="filter-btn" data-filter="reading">Reading</button>
+                    </div>
+                    <button id="addTaskBtn" class="primary-btn"><i class="fas fa-plus"></i> Add Task</button>
+                </div>
+
+                <div class="task-lists">
+                    <div class="task-column">
+                        <h3>To Do</h3>
+                        <div id="todoList" class="task-list"></div>
+                    </div>
+                    <div class="task-column">
+                        <h3>In Progress</h3>
+                        <div id="inProgressList" class="task-list"></div>
+                    </div>
+                    <div class="task-column">
+                        <h3>Completed</h3>
+                        <div id="completedList" class="task-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Focus Page -->
+            <div class="page hidden" id="focusPage">
+                <div class="focus-container">
+                    <div class="music-player">
+                        <div class="music-header">
+                            <h3>Focus Music</h3>
+                            <div class="now-playing" id="nowPlaying">No track selected</div>
+                        </div>
+                        <div class="music-controls">
+                            <div class="file-input-container">
+                                <label for="musicFile" class="file-input-label">
+                                    <i class="fas fa-music"></i> Choose Music
+                                </label>
+                                <input type="file" id="musicFile" accept="audio/*" multiple class="file-input">
+                            </div>
+                            <select id="musicSelect" class="music-select">
+                                <option value="">Select from playlist</option>
+                            </select>
+                            <div class="player-controls">
+                                <div class="main-controls">
+                                    <button id="prevTrack" class="icon-btn"><i class="fas fa-step-backward"></i></button>
+                                    <button id="playMusic" class="icon-btn"><i class="fas fa-play"></i></button>
+                                    <button id="pauseMusic" class="icon-btn hidden"><i class="fas fa-pause"></i></button>
+                                    <button id="nextTrack" class="icon-btn"><i class="fas fa-step-forward"></i></button>
+                                    <button id="toggleLoop" class="icon-btn"><i class="fas fa-redo"></i></button>
+                                </div>
+                                <div class="progress-controls">
+                                    <span id="currentTime">0:00</span>
+                                    <div class="progress-bar">
+                                        <input type="range" id="seekBar" min="0" max="100" value="0">
+                                    </div>
+                                    <span id="duration">0:00</span>
+                                </div>
+                                <div class="volume-control">
+                                    <i class="fas fa-volume-up"></i>
+                                    <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timer-container">
+                        <div class="study-mode-selector">
+                            <button class="mode-btn active" data-mode="focus">Focus</button>
+                            <button class="mode-btn" data-mode="shortBreak">Short Break</button>
+                            <button class="mode-btn" data-mode="longBreak">Long Break</button>
+                        </div>
+                        
+                        <div class="timer-controls">
+                            <button id="decreaseTime" class="circle-btn"><i class="fas fa-minus"></i></button>
+                            <div id="timer">25:00</div>
+                            <button id="increaseTime" class="circle-btn"><i class="fas fa-plus"></i></button>
+                        </div>
+
+                        <div class="progress-ring">
+                            <svg width="200" height="200">
+                                <circle class="progress-ring-circle" cx="100" cy="100" r="90" stroke-width="8" fill="transparent" />
+                            </svg>
+                        </div>
+
+                        <div class="timer-buttons">
+                            <button id="startTimer" class="primary-btn"><i class="fas fa-play"></i></button>
+                            <button id="pauseTimer" class="secondary-btn hidden"><i class="fas fa-pause"></i></button>
+                            <button id="resetTimer" class="secondary-btn"><i class="fas fa-redo"></i></button>
+                        </div>
+
+                        <div id="quote" class="quote"></div>
+                    </div>
+
+                    <div class="study-session">
+                        <h2>Current Study Session</h2>
+                        <div class="subject-selector">
+                            <select id="subjectSelect">
+                                <option value="">Select Subject</option>
+                            </select>
+                            <button id="addSubjectBtn" class="icon-btn"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="study-notes">
+                            <textarea id="sessionNotes" placeholder="Take quick notes during your study session..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Page -->
+            <div class="page hidden" id="notesPage">
+                <div class="notes-container">
+                    <div class="notes-sidebar">
+                        <div class="notes-search">
+                            <input type="text" id="searchNotes" placeholder="Search notes...">
+                        </div>
+                        <button id="addNoteBtn" class="primary-btn"><i class="fas fa-plus"></i> New Note</button>
+                        <div id="notesList" class="notes-list"></div>
+                    </div>
+                    <div class="notes-editor">
+                        <div class="editor-toolbar">
+                            <button class="tool-btn" data-command="bold"><i class="fas fa-bold"></i></button>
+                            <button class="tool-btn" data-command="italic"><i class="fas fa-italic"></i></button>
+                            <button class="tool-btn" data-command="underline"><i class="fas fa-underline"></i></button>
+                            <button class="tool-btn" data-command="insertUnorderedList"><i class="fas fa-list"></i></button>
+                            <button class="tool-btn" data-command="insertOrderedList"><i class="fas fa-list-ol"></i></button>
+                            <button class="tool-btn" data-command="createLink"><i class="fas fa-link"></i></button>
+                            <div class="toolbar-spacer"></div>
+                            <button id="saveNoteBtn" class="primary-btn"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                        <div id="noteEditor" contenteditable="true" class="note-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar Page -->
+            <div class="page hidden" id="calendarPage">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div class="calendar-info">
+                            <div class="today-info">
+                                <span>Today: </span>
+                                <span id="todayDate" class="highlight"></span>
+                            </div>
+                            <div class="year-info">
+                                <span>Days left in year: </span>
+                                <span id="daysLeftInYear" class="highlight"></span>
+                            </div>
+                        </div>
+                        <div class="month-navigation">
+                            <button id="prevMonth" class="icon-btn"><i class="fas fa-chevron-left"></i></button>
+                            <h2 id="currentMonthYear"></h2>
+                            <button id="nextMonth" class="icon-btn"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-days">
+                            <div>Sun</div>
+                            <div>Mon</div>
+                            <div>Tue</div>
+                            <div>Wed</div>
+                            <div>Thu</div>
+                            <div>Fri</div>
+                            <div>Sat</div>
+                        </div>
+                        <div id="calendarDates" class="calendar-dates"></div>
+                    </div>
+                    <div class="events-list">
+                        <div class="events-header">
+                            <h3>Events</h3>
+                            <button id="addEventBtn" class="primary-btn">
+                                <i class="fas fa-plus"></i> Add Event
+                            </button>
+                        </div>
+                        <div id="eventsList"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modals -->
+        <div id="taskModal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Add Task</h2>
+                <form id="taskForm">
+                    <div class="form-group">
+                        <label for="taskTitle">Title</label>
+                        <input type="text" id="taskTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDescription">Description</label>
+                        <textarea id="taskDescription"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskType">Type</label>
+                        <select id="taskType" required>
+                            <option value="homework">Homework</option>
+                            <option value="exam">Exam</option>
+                            <option value="project">Project</option>
+                            <option value="reading">Reading</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDueDate">Due Date</label>
+                        <input type="date" id="taskDueDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDueTime">Due Time</label>
+                        <input type="time" id="taskDueTime">
+                    </div>
+                    <div class="form-group">
+                        <label for="taskPriority">Priority</label>
+                        <select id="taskPriority" required>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="primary-btn">Add Task</button>
+                        <button type="button" id="cancelTask" class="secondary-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="eventModal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Add Event</h2>
+                <form id="eventForm">
+                    <div class="form-group">
+                        <label for="eventTitle">Title</label>
+                        <input type="text" id="eventTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventDate">Date</label>
+                        <input type="date" id="eventDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventTime">Time</label>
+                        <input type="time" id="eventTime">
+                    </div>
+                    <div class="form-group">
+                        <label for="eventDescription">Description</label>
+                        <textarea id="eventDescription"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="primary-btn">Add Event</button>
+                        <button type="button" id="cancelEvent" class="secondary-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="subjectModal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Add Subject</h2>
+                <form id="subjectForm">
+                    <div class="form-group">
+                        <label for="subjectName">Subject Name</label>
+                        <input type="text" id="subjectName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subjectColor">Color</label>
+                        <input type="color" id="subjectColor" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="primary-btn">Add Subject</button>
+                        <button type="button" id="cancelSubject" class="secondary-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Audio Elements -->
+        <audio id="tickSound" preload="auto">
+            <source src="assets/sounds/tick.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="clickSound" preload="auto">
+            <source src="assets/sounds/click.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="completeSound" preload="auto">
+            <source src="assets/sounds/complete.mp3" type="audio/mpeg">
+        </audio>
+
+        <script >// Global variables
+            let audio = new Audio();
+            let isPlaying = false;
+            let currentTrack = null;
+            let isLooping = false;
+            let playlist = [];
+            
+            // DOM Elements
+            const elements = {
+                // Pages
+                homePage: null,
+                tasksPage: null,
+                focusPage: null,
+                notesPage: null,
+                calendarPage: null,
+            
+                // Navigation
+                navButtons: null,
+                
+                // Music Player
+                musicFile: null,
+                musicSelect: null,
+                playButton: null,
+                pauseButton: null,
+                prevButton: null,
+                nextButton: null,
+                loopButton: null,
+                volumeSlider: null,
+                seekBar: null,
+                nowPlaying: null,
+                currentTime: null,
+                duration: null,
+            
+                // Timer
+                timer: null,
+                startTimer: null,
+                pauseTimer: null,
+                resetTimer: null,
+                progressRing: null,
+                quote: null,
+                taskForm: null,
+                noteEditor: null,
+                notesList: null,
+                searchNotes: null,
+                addNoteBtn: null,
+                calendarDates: null,
+                eventsList: null,
+                subjectSelect: null,
+                sessionNotes: null
+            };
+            
+            // State Management
+            const state = {
+                tasks: JSON.parse(localStorage.getItem('tasks')) || [],
+                notes: JSON.parse(localStorage.getItem('notes')) || [],
+                subjects: JSON.parse(localStorage.getItem('subjects')) || [],
+                events: JSON.parse(localStorage.getItem('events')) || [],
+                currentPage: 'homePage',
+                timerMode: 'focus',
+                timerModes: {
+                    focus: 25 * 60,
+                    shortBreak: 5 * 60,
+                    longBreak: 15 * 60
+                },
+                timeLeft: 25 * 60,
+                isTimerRunning: false,
+                currentNote: null,
+                currentSubject: null,
+                timerId: null,
+                studyTime: parseInt(localStorage.getItem('studyTime')) || 0,
+                streak: parseInt(localStorage.getItem('streak')) || 0,
+                lastStudyDate: localStorage.getItem('lastStudyDate') || null,
+                editingTask: null,
+                editingEvent: null,
+                currentMonth: new Date().getMonth(),
+                currentYear: new Date().getFullYear(),
+                currentMusic: null,
+                musicVolume: 50
+            };
+            
+            // Initialize elements when DOM is loaded
+            function initializeElements() {
+                // Pages
+                elements.homePage = document.getElementById('homePage');
+                elements.tasksPage = document.getElementById('tasksPage');
+                elements.focusPage = document.getElementById('focusPage');
+                elements.notesPage = document.getElementById('notesPage');
+                elements.calendarPage = document.getElementById('calendarPage');
+            
+                // Navigation
+                elements.navButtons = document.querySelectorAll('.nav-btn');
+                
+                // Music Player
+                elements.musicFile = document.getElementById('musicFile');
+                elements.musicSelect = document.getElementById('musicSelect');
+                elements.playButton = document.getElementById('playMusic');
+                elements.pauseButton = document.getElementById('pauseMusic');
+                elements.prevButton = document.getElementById('prevTrack');
+                elements.nextButton = document.getElementById('nextTrack');
+                elements.loopButton = document.getElementById('toggleLoop');
+                elements.volumeSlider = document.getElementById('volumeSlider');
+                elements.seekBar = document.getElementById('seekBar');
+                elements.nowPlaying = document.getElementById('nowPlaying');
+                elements.currentTime = document.getElementById('currentTime');
+                elements.duration = document.getElementById('duration');
+            
+                // Timer
+                elements.timer = document.getElementById('timer');
+                elements.startTimer = document.getElementById('startTimer');
+                elements.pauseTimer = document.getElementById('pauseTimer');
+                elements.resetTimer = document.getElementById('resetTimer');
+                elements.progressRing = document.getElementById('progressRing');
+                elements.quote = document.getElementById('quote');
+            
+                // Tasks
+                elements.taskForm = document.getElementById('taskForm');
+            
+                // Notes
+                elements.noteEditor = document.getElementById('noteEditor');
+                elements.notesList = document.getElementById('notesList');
+                elements.searchNotes = document.getElementById('searchNotes');
+                elements.addNoteBtn = document.getElementById('addNoteBtn');
+            
+                // Calendar
+                elements.calendarDates = document.getElementById('calendarDates');
+                elements.eventsList = document.getElementById('eventsList');
+            
+                // Subject
+                elements.subjectSelect = document.getElementById('subjectSelect');
+                elements.sessionNotes = document.getElementById('sessionNotes');
+            }
+            
+            // Initialize the app when DOM is loaded
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('DOM loaded, initializing app...');
+                
+                // Initialize elements first
+                initializeElements();
+                
+                // Then initialize features
+                initializeNavigation();
+                initializeTimer();
+                initializeTasks();
+                initializeNotes();
+                initializeCalendar();
+                initializeEvents();
+                initializeSubjects();
+                initializeMusicPlayer();
+                initializeModals();
+                initializeHomeButtons();
+                
+                // Show initial page
+                showPage('homePage');
+                
+                // Update initial displays
+                updateTimerDisplay();
+                updateDashboard();
+                updateCalendarInfo();
+            });
+            
+            // Navigation Functions
+            function initializeNavigation() {
+                if (!elements.navButtons) return;
+                
+                // Navigation buttons
+                elements.navButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const pageId = btn.dataset.page;
+                        if (pageId) {
+                            showPage(pageId);
+                        }
+                    });
+                });
+            
+                // Quick action buttons
+                const quickAddTaskBtn = document.getElementById('quickAddTask');
+                const startStudySessionBtn = document.getElementById('startStudySession');
+                const reviewNotesBtn = document.getElementById('reviewNotes');
+            
+                if (quickAddTaskBtn) {
+                    quickAddTaskBtn.addEventListener('click', () => toggleModal('taskModal', true));
+                }
+                if (startStudySessionBtn) {
+                    startStudySessionBtn.addEventListener('click', () => showPage('focusPage'));
+                }
+                if (reviewNotesBtn) {
+                    reviewNotesBtn.addEventListener('click', () => showPage('notesPage'));
+                }
+            }
+            
+            function showPage(pageId) {
+                console.log('Showing page:', pageId);
+                
+                // Hide all pages
+                if (elements.homePage) elements.homePage.classList.add('hidden');
+                if (elements.tasksPage) elements.tasksPage.classList.add('hidden');
+                if (elements.focusPage) elements.focusPage.classList.add('hidden');
+                if (elements.notesPage) elements.notesPage.classList.add('hidden');
+                if (elements.calendarPage) elements.calendarPage.classList.add('hidden');
+            
+                // Show the selected page
+                const page = document.getElementById(pageId);
+                if (page) {
+                    page.classList.remove('hidden');
+                    console.log('Showing page:', pageId);
+                } else {
+                    console.error('Page not found:', pageId);
+                }
+            }
+            
+            // Home page initialization
+            function initializeHomeButtons() {
+                console.log('Initializing home buttons...');
+            
+                // Quick Add Task button
+                const quickAddTaskBtn = document.getElementById('quickAddTask');
+                if (quickAddTaskBtn) {
+                    quickAddTaskBtn.addEventListener('click', () => {
+                        console.log('Quick Add Task clicked');
+                        toggleModal('taskModal', true);
+                    });
+                }
+            
+                // Start Study Session button
+                const startStudySessionBtn = document.getElementById('startStudySession');
+                if (startStudySessionBtn) {
+                    startStudySessionBtn.addEventListener('click', () => {
+                        console.log('Start Study Session clicked');
+                        showPage('focusPage');
+                        // Reset and prepare the timer
+                        resetTimer();
+                        setTimerMode('focus');
+                    });
+                }
+            
+                // Review Notes button
+                const reviewNotesBtn = document.getElementById('reviewNotes');
+                if (reviewNotesBtn) {
+                    reviewNotesBtn.addEventListener('click', () => {
+                        console.log('Review Notes clicked');
+                        showPage('notesPage');
+                    });
+                }
+            }
+            
+            function updateDashboard() {
+                console.log('Updating dashboard...');
+            
+                // Update tasks due today
+                const todayTaskCount = document.getElementById('todayTaskCount');
+                if (todayTaskCount) {
+                    const today = new Date().toISOString().split('T')[0];
+                    const tasksToday = state.tasks.filter(task => 
+                        task.dueDate === today && task.status !== 'completed'
+                    ).length;
+                    todayTaskCount.textContent = tasksToday;
+                }
+            
+                // Update study time today
+                const todayStudyTime = document.getElementById('todayStudyTime');
+                if (todayStudyTime) {
+                    const hours = Math.floor(state.studyTime / 3600);
+                    const minutes = Math.floor((state.studyTime % 3600) / 60);
+                    todayStudyTime.textContent = `${hours}h ${minutes}m`;
+                }
+            
+                // Update study streak
+                const studyStreak = document.getElementById('studyStreak');
+                if (studyStreak) {
+                    studyStreak.textContent = `${state.streak} days`;
+                }
+            
+                // Update upcoming events
+                const upcomingList = document.getElementById('upcomingList');
+                if (upcomingList) {
+                    const today = new Date();
+                    const nextWeek = new Date(today);
+                    nextWeek.setDate(nextWeek.getDate() + 7);
+            
+                    const upcomingEvents = state.events
+                        .filter(event => {
+                            const eventDate = new Date(event.date);
+                            return eventDate >= today && eventDate <= nextWeek;
+                        })
+                        .sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+                    if (upcomingEvents.length > 0) {
+                        upcomingList.innerHTML = upcomingEvents
+                            .map(event => `
+                                <div class="upcoming-item">
+                                    <div class="upcoming-date">${formatDate(event.date)}</div>
+                                    <div class="upcoming-title">${event.title}</div>
+                                    ${event.time ? `<div class="upcoming-time">${event.time}</div>` : ''}
+                                </div>
+                            `).join('');
+                    } else {
+                        upcomingList.innerHTML = '<p class="no-events">No upcoming events this week</p>';
+                    }
+                }
+            }
+            
+            // Timer Functions
+            function initializeTimer() {
+                updateTimerDisplay();
+                setupProgressRing();
+            
+                // Timer mode buttons
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const mode = btn.dataset.mode;
+                        if (mode) {
+                            setTimerMode(mode);
+                        }
+                    });
+                });
+            
+                // Timer control buttons
+                if (elements.startTimer) {
+                    elements.startTimer.addEventListener('click', startTimer);
+                }
+                if (elements.pauseTimer) {
+                    elements.pauseTimer.addEventListener('click', pauseTimer);
+                }
+                if (elements.resetTimer) {
+                    elements.resetTimer.addEventListener('click', resetTimer);
+                }
+            
+                const decreaseTimeBtn = document.getElementById('decreaseTime');
+                const increaseTimeBtn = document.getElementById('increaseTime');
+            
+                if (decreaseTimeBtn) {
+                    decreaseTimeBtn.addEventListener('click', () => adjustTime(-5));
+                }
+                if (increaseTimeBtn) {
+                    increaseTimeBtn.addEventListener('click', () => adjustTime(5));
+                }
+            }
+            
+            function setTimerMode(mode) {
+                state.timerMode = mode;
+                state.timeLeft = state.timerModes[mode];
+                updateTimerDisplay();
+                updateProgressRing(0);
+            }
+            
+            function startTimer() {
+                if (state.isTimerRunning) return;
+                
+                const startBtn = document.getElementById('startTimer');
+                const pauseBtn = document.getElementById('pauseTimer');
+                
+                if (startBtn) startBtn.classList.add('hidden');
+                if (pauseBtn) pauseBtn.classList.remove('hidden');
+                
+                state.isTimerRunning = true;
+                state.timerId = setInterval(() => {
+                    if (state.timeLeft > 0) {
+                        state.timeLeft--;
+                        updateTimerDisplay();
+                        updateProgressRing(1 - (state.timeLeft / state.timerModes[state.timerMode]));
+                        
+                        // Play tick sound every minute
+                        if (state.timeLeft % 60 === 0 && state.timeLeft > 0) {
+                            playSound('timerTick');
+                        }
+                    } else {
+                        completeTimer();
+                    }
+                }, 1000);
+                
+                playSound('buttonClick');
+            }
+            
+            function pauseTimer() {
+                if (!state.isTimerRunning) return;
+                
+                const startBtn = document.getElementById('startTimer');
+                const pauseBtn = document.getElementById('pauseTimer');
+                
+                if (startBtn) startBtn.classList.remove('hidden');
+                if (pauseBtn) pauseBtn.classList.add('hidden');
+                
+                clearInterval(state.timerId);
+                state.isTimerRunning = false;
+                playSound('buttonClick');
+            }
+            
+            function resetTimer() {
+                pauseTimer();
+                state.timeLeft = state.timerModes[state.timerMode];
+                updateTimerDisplay();
+                updateProgressRing(0);
+                playSound('buttonClick');
+            }
+            
+            function completeTimer() {
+                pauseTimer();
+                playSound('timerComplete');
+                updateStudyStats();
+                
+                const message = state.timerMode === 'focus' ? 
+                    'Focus session complete! Take a break?' : 
+                    'Break time is over. Ready to focus?';
+                
+                if (confirm(message)) {
+                    setTimerMode(state.timerMode === 'focus' ? 'shortBreak' : 'focus');
+                } else {
+                    resetTimer();
+                }
+            }
+            
+            function updateTimerDisplay() {
+                const minutes = Math.floor(state.timeLeft / 60);
+                const seconds = state.timeLeft % 60;
+                const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                const timerDisplay = document.getElementById('timer');
+                if (timerDisplay) {
+                    timerDisplay.textContent = display;
+                }
+            }
+            
+            function adjustTime(minutes) {
+                if (!state.isTimerRunning) {
+                    const newTime = state.timeLeft + (minutes * 60);
+                    if (newTime >= 60 && newTime <= 3600) { // Between 1 minute and 1 hour
+                        state.timeLeft = newTime;
+                        updateTimerDisplay();
+                        playSound('buttonClick');
+                    }
+                }
+            }
+            
+            function setupProgressRing() {
+                const circle = document.querySelector('.progress-ring-circle');
+                if (circle) {
+                    const radius = circle.r.baseVal.value;
+                    const circumference = radius * 2 * Math.PI;
+                    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+                    circle.style.strokeDashoffset = circumference;
+                }
+            }
+            
+            function updateProgressRing(progress) {
+                const circle = document.querySelector('.progress-ring-circle');
+                if (circle) {
+                    const radius = circle.r.baseVal.value;
+                    const circumference = radius * 2 * Math.PI;
+                    const offset = circumference - (progress * circumference);
+                    circle.style.strokeDashoffset = offset;
+                }
+            }
+            
+            // Task Management Functions
+            function initializeTasks() {
+                // Task filter buttons
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        renderTasks(btn.dataset.filter);
+                    });
+                });
+            
+                // Add task button
+                const addTaskBtn = document.getElementById('addTaskBtn');
+                if (addTaskBtn) {
+                    addTaskBtn.addEventListener('click', () => toggleModal('taskModal', true));
+                }
+            
+                // Task form
+                if (elements.taskForm) {
+                    elements.taskForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        addTask();
+                        toggleModal('taskModal', false);
+                    });
+                }
+            
+                // Cancel task button
+                const cancelTask = document.getElementById('cancelTask');
+                if (cancelTask) {
+                    cancelTask.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        toggleModal('taskModal', false);
+                    });
+                }
+            
+                renderTasks();
+                initializeTaskDragAndDrop();
+            }
+            
+            function addTask() {
+                const task = {
+                    id: Date.now(),
+                    title: document.getElementById('taskTitle').value,
+                    description: document.getElementById('taskDescription').value,
+                    type: document.getElementById('taskType').value,
+                    dueDate: document.getElementById('taskDueDate').value,
+                    dueTime: document.getElementById('taskDueTime').value,
+                    priority: document.getElementById('taskPriority').value,
+                    status: 'todo',
+                    createdAt: new Date().toISOString()
+                };
+            
+                state.tasks.push(task);
+                saveTasks();
+                renderTasks();
+                updateDashboard();
+                elements.taskForm.reset();
+            }
+            
+            function createTaskElement(task) {
+                return `
+                    <div class="task-item" draggable="true" data-task-id="${task.id}">
+                        <div class="task-priority ${task.priority}"></div>
+                        <h4>${task.title}</h4>
+                        <p>${task.description}</p>
+                        <div class="task-meta">
+                            <span class="task-type">${task.type}</span>
+                            <span class="task-due">${formatDate(task.dueDate)}</span>
+                        </div>
+                        <div class="task-actions">
+                            <button onclick="editTask(${task.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteTask(${task.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            function initializeTaskDragAndDrop() {
+                const taskItems = document.querySelectorAll('.task-item');
+                const dropZones = document.querySelectorAll('.task-list');
+            
+                taskItems.forEach(task => {
+                    task.addEventListener('dragstart', handleDragStart);
+                    task.addEventListener('dragend', handleDragEnd);
+                });
+            
+                dropZones.forEach(zone => {
+                    zone.addEventListener('dragover', handleDragOver);
+                    zone.addEventListener('drop', handleDrop);
+                });
+            }
+            
+            // Modal Functions
+            function initializeModals() {
+                // Modal background click handlers
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            toggleModal(modal.id, false);
+                        }
+                    });
+                });
+            
+                // Escape key handler for modals
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        document.querySelectorAll('.modal').forEach(modal => {
+                            if (!modal.classList.contains('hidden')) {
+                                toggleModal(modal.id, false);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            function toggleModal(modalId, show) {
+                const modal = document.getElementById(modalId);
+                if (!modal) return;
+                
+                if (show) {
+                    modal.classList.remove('hidden');
+                    // Reset form if present
+                    const form = modal.querySelector('form');
+                    if (form) form.reset();
+                } else {
+                    modal.classList.add('hidden');
+                    // Clear any error states or messages
+                    const inputs = modal.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => {
+                        input.classList.remove('error');
+                        const errorMsg = input.parentElement.querySelector('.error-message');
+                        if (errorMsg) errorMsg.remove();
+                    });
+                }
+            }
+            
+            // Notes Management
+            function initializeNotes() {
+                console.log('Initializing notes...');
+                const addNoteBtn = document.getElementById('addNoteBtn');
+                const saveNoteBtn = document.getElementById('saveNoteBtn');
+                const noteEditor = document.getElementById('noteEditor');
+                const notesList = document.getElementById('notesList');
+                const searchNotes = document.getElementById('searchNotes');
+            
+                // Initialize state if empty
+                state.notes = JSON.parse(localStorage.getItem('notes')) || [];
+                state.currentNote = null;
+            
+                if (addNoteBtn) {
+                    addNoteBtn.addEventListener('click', () => {
+                        createNewNote();
+                        playSound('buttonClick');
+                    });
+                }
+            
+                if (saveNoteBtn) {
+                    saveNoteBtn.addEventListener('click', () => {
+                        saveCurrentNote();
+                        playSound('buttonClick');
+                    });
+                }
+            
+                if (searchNotes) {
+                    searchNotes.addEventListener('input', (e) => {
+                        const searchTerm = e.target.value.toLowerCase();
+                        const filteredNotes = state.notes.filter(note => 
+                            note.title.toLowerCase().includes(searchTerm) || 
+                            note.content.toLowerCase().includes(searchTerm)
+                        );
+                        renderNotesList(filteredNotes);
+                    });
+                }
+                
+                // Initialize rich text editor toolbar
+                document.querySelectorAll('.tool-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const command = btn.dataset.command;
+                        if (command === 'createLink') {
+                            const url = prompt('Enter URL:');
+                            if (url) document.execCommand(command, false, url);
+                        } else {
+                            document.execCommand(command, false, null);
+                        }
+                        if (noteEditor) noteEditor.focus();
+                    });
+                });
+            
+                if (noteEditor) {
+                    // Handle note title changes
+                    noteEditor.addEventListener('input', () => {
+                        if (state.currentNote) {
+                            // Update the note's content
+                            state.currentNote.content = noteEditor.innerHTML;
+                            
+                            // Extract title from first line
+                            const content = noteEditor.innerText;
+                            const firstLine = content.split('\n')[0].trim();
+                            if (firstLine && firstLine !== state.currentNote.title) {
+                                state.currentNote.title = firstLine.substring(0, 50); // Limit title length
+                            }
+                            
+                            // Don't save automatically, wait for save button
+                            renderNotesList(); // Just update the list view
+                        }
+                    });
+                }
+            
+                // Initial render
+                renderNotesList();
+            }
+            
+            function createNewNote() {
+                console.log('Creating new note...');
+                const noteEditor = document.getElementById('noteEditor');
+                
+                const note = {
+                    id: Date.now(),
+                    title: 'New Note',
+                    content: '',
+                    createdAt: new Date('2025-01-13T07:09:55+05:30').toISOString(),
+                    updatedAt: new Date('2025-01-13T07:09:55+05:30').toISOString()
+                };
+            
+                state.notes.unshift(note);
+                state.currentNote = note;
+                saveNotes();
+                renderNotesList();
+                
+                if (noteEditor) {
+                    noteEditor.innerHTML = '';
+                    noteEditor.focus();
+                }
+            }
+            
+            function saveCurrentNote() {
+                if (state.currentNote) {
+                    const noteEditor = document.getElementById('noteEditor');
+                    if (noteEditor) {
+                        state.currentNote.content = noteEditor.innerHTML;
+                        state.currentNote.updatedAt = new Date('2025-01-13T07:09:55+05:30').toISOString();
+                        
+                        // Extract title from first line if it exists
+                        const content = noteEditor.innerText;
+                        const firstLine = content.split('\n')[0].trim();
+                        if (firstLine) {
+                            state.currentNote.title = firstLine.substring(0, 50); // Limit title length
+                        }
+                        
+                        saveNotes();
+                        renderNotesList();
+                        
+                        // Show save confirmation
+                        const saveNoteBtn = document.getElementById('saveNoteBtn');
+                        if (saveNoteBtn) {
+                            const originalText = saveNoteBtn.innerHTML;
+                            saveNoteBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                            setTimeout(() => {
+                                saveNoteBtn.innerHTML = originalText;
+                            }, 2000);
+                        }
+                    }
+                }
+            }
+            
+            function renderNotesList(filteredNotes = state.notes) {
+                const notesList = document.getElementById('notesList');
+                if (!notesList) return;
+            
+                notesList.innerHTML = filteredNotes.map(note => `
+                    <div class="note-item ${state.currentNote?.id === note.id ? 'active' : ''}" 
+                         data-note-id="${note.id}">
+                        <h4>${note.title || 'Untitled'}</h4>
+                        <p>${formatDate(note.updatedAt)}</p>
+                    </div>
+                `).join('');
+            
+                // Add click event listeners to note items
+                document.querySelectorAll('.note-item').forEach(noteItem => {
+                    noteItem.addEventListener('click', () => {
+                        const noteId = parseInt(noteItem.dataset.noteId);
+                        selectNote(noteId);
+                        playSound('buttonClick');
+                    });
+                });
+            }
+            
+            function selectNote(noteId) {
+                const noteEditor = document.getElementById('noteEditor');
+                const note = state.notes.find(note => note.id === noteId);
+                
+                if (note && noteEditor) {
+                    state.currentNote = note;
+                    noteEditor.innerHTML = note.content || '';
+                    renderNotesList(); // Re-render to update active state
+                    noteEditor.focus();
+                }
+            }
+            
+            function saveNotes() {
+                localStorage.setItem('notes', JSON.stringify(state.notes));
+            }
+            
+            // Calendar Functions
+            function initializeCalendar() {
+                // Set initial state to current month and year
+                const today = new Date();
+                state.currentMonth = today.getMonth();
+                state.currentYear = today.getFullYear();
+            
+                // Add event listeners for navigation
+                document.getElementById('prevMonth').addEventListener('click', () => navigateMonth(-1));
+                document.getElementById('nextMonth').addEventListener('click', () => navigateMonth(1));
+            
+                // Add event listener for add event button
+                document.getElementById('addEventBtn').addEventListener('click', () => {
+                    document.getElementById('eventDate').valueAsDate = new Date();
+                    toggleModal('eventModal', true);
+                });
+            
+                // Initialize calendar display
+                updateCalendarInfo();
+                renderCalendar();
+                renderEvents();
+            }
+            
+            function updateCalendarInfo() {
+                const today = new Date();
+                const endOfYear = new Date(today.getFullYear(), 11, 31);
+                const daysLeft = Math.ceil((endOfYear - today) / (1000 * 60 * 60 * 24));
+                
+                // Format today's date with full weekday and month names
+                const dateOptions = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    timeZone: 'Asia/Kolkata'
+                };
+                
+                // Update today's date display with proper formatting
+                const todayDate = document.getElementById('todayDate');
+                if (todayDate) {
+                    const formattedDate = today.toLocaleDateString('en-IN', dateOptions);
+                    todayDate.innerHTML = `<strong>${formattedDate}</strong>`;
+                }
+                
+                // Update days left in year with proper formatting
+                const daysLeftEl = document.getElementById('daysLeftInYear');
+                if (daysLeftEl) {
+                    const daysText = daysLeft === 1 ? '1 day' : `${daysLeft} days`;
+                    daysLeftEl.innerHTML = `<strong>${daysText}</strong>`;
+                }
+            }
+            
+            function renderCalendar() {
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                   'July', 'August', 'September', 'October', 'November', 'December'];
+                
+                const today = new Date();
+                const firstDay = new Date(state.currentYear, state.currentMonth, 1);
+                const lastDay = new Date(state.currentYear, state.currentMonth + 1, 0);
+                
+                // Update month and year display
+                document.getElementById('currentMonthYear').textContent = 
+                    `${monthNames[state.currentMonth]} ${state.currentYear}`;
+                
+                let datesHTML = '';
+                
+                // Add empty cells for days before the first day of the month
+                for (let i = 0; i < firstDay.getDay(); i++) {
+                    datesHTML += '<div class="calendar-date empty"></div>';
+                }
+                
+                // Add cells for each day of the month
+                for (let date = 1; date <= lastDay.getDate(); date++) {
+                    const currentDate = new Date(state.currentYear, state.currentMonth, date);
+                    const isToday = currentDate.toDateString() === today.toDateString();
+                    
+                    const dateStr = `${state.currentYear}-${(state.currentMonth + 1).toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`;
+                    const hasEvents = state.events.some(event => event.date === dateStr);
+                    
+                    datesHTML += `
+                        <div class="calendar-date${isToday ? ' today' : ''}${hasEvents ? ' has-events' : ''}" 
+                             data-date="${dateStr}">
+                            <span class="date-number">${date}</span>
+                            ${hasEvents ? '<span class="event-dot"></span>' : ''}
+                        </div>
+                    `;
+                }
+                
+                // Add empty cells for remaining days to complete the grid
+                const remainingCells = 42 - (firstDay.getDay() + lastDay.getDate()); // 42 = 6 rows × 7 days
+                for (let i = 0; i < remainingCells; i++) {
+                    datesHTML += '<div class="calendar-date empty"></div>';
+                }
+                
+                // Update the calendar grid
+                const calendarDates = document.getElementById('calendarDates');
+                if (calendarDates) {
+                    calendarDates.innerHTML = datesHTML;
+                    
+                    // Add click handlers to dates
+                    document.querySelectorAll('.calendar-date:not(.empty)').forEach(dateElement => {
+                        dateElement.addEventListener('click', () => {
+                            // Remove previous selection
+                            document.querySelectorAll('.calendar-date').forEach(d => d.classList.remove('selected'));
+                            // Add selected class
+                            dateElement.classList.add('selected');
+                            
+                            const selectedDate = dateElement.dataset.date;
+                            if (selectedDate) {
+                                // Filter and display events for the selected date
+                                const dateEvents = state.events.filter(event => event.date === selectedDate);
+                                renderEvents(dateEvents);
+                            }
+                        });
+                    });
+                }
+            }
+            
+            function navigateMonth(direction) {
+                state.currentMonth += direction;
+                
+                if (state.currentMonth > 11) {
+                    state.currentMonth = 0;
+                    state.currentYear++;
+                } else if (state.currentMonth < 0) {
+                    state.currentMonth = 11;
+                    state.currentYear--;
+                }
+                
+                renderCalendar();
+                renderEvents();
+                playSound('buttonClick');
+            }
+            
+            // Event rendering
+            function renderEvents(filteredEvents = state.events) {
+                const eventsList = document.getElementById('eventsList');
+                if (!eventsList) return;
+                
+                // Sort events by date
+                const sortedEvents = [...filteredEvents].sort((a, b) => {
+                    const dateA = new Date(a.date + (a.time || 'T00:00:00'));
+                    const dateB = new Date(b.date + (b.time || 'T00:00:00'));
+                    return dateA - dateB;
+                });
+                
+                // Group events by date
+                const groupedEvents = sortedEvents.reduce((groups, event) => {
+                    const date = event.date;
+                    if (!groups[date]) {
+                        groups[date] = [];
+                    }
+                    groups[date].push(event);
+                    return groups;
+                }, {});
+                
+                // Generate HTML
+                let eventsHTML = '';
+                
+                Object.entries(groupedEvents).forEach(([date, events]) => {
+                    eventsHTML += `
+                        <div class="event-group">
+                            <h3 class="event-date-header">${formatDate(date)}</h3>
+                            ${events.map(event => `
+                                <div class="event-item">
+                                    <div class="event-header">
+                                        <h4>${event.title}</h4>
+                                        <div class="event-actions">
+                                            <button onclick="editEvent(${event.id})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button onclick="deleteEvent(${event.id})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    ${event.time ? `<p class="event-time">${event.time}</p>` : ''}
+                                    ${event.description ? `<p class="event-desc">${event.description}</p>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                });
+                
+                eventsList.innerHTML = eventsHTML || '<p class="no-events">No events scheduled</p>';
+            }
+            
+            // Event Functions
+            function initializeEvents() {
+                // Load events from localStorage
+                state.events = JSON.parse(localStorage.getItem('events')) || [];
+                
+                // Initialize add event button
+                const addEventBtn = document.getElementById('addEventBtn');
+                if (addEventBtn) {
+                    addEventBtn.addEventListener('click', () => {
+                        const today = new Date('2025-01-13T07:00:56+05:30').toISOString().split('T')[0];
+                        const dateInput = document.getElementById('eventDate');
+                        if (dateInput) dateInput.value = today;
+                        toggleModal('eventModal', true);
+                    });
+                }
+                
+                // Initialize event form
+                const eventForm = document.getElementById('eventForm');
+                if (eventForm) {
+                    eventForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        addEvent();
+                    });
+                }
+            }
+            
+            function addEvent() {
+                const titleInput = document.getElementById('eventTitle');
+                const dateInput = document.getElementById('eventDate');
+                const timeInput = document.getElementById('eventTime');
+                const descInput = document.getElementById('eventDescription');
+                
+                if (!titleInput || !dateInput) {
+                    console.error('Required event inputs not found');
+                    return;
+                }
+                
+                const title = titleInput.value.trim();
+                const date = dateInput.value;
+                const time = timeInput ? timeInput.value : '';
+                const description = descInput ? descInput.value.trim() : '';
+                
+                if (!title || !date) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
+                const newEvent = {
+                    id: Date.now(),
+                    title,
+                    date,
+                    time,
+                    description
+                };
+                
+                state.events = state.events || [];
+                state.events.push(newEvent);
+                localStorage.setItem('events', JSON.stringify(state.events));
+                
+                // Update UI
+                renderEvents();
+                renderCalendar();
+                
+                // Clear form and close modal
+                const form = document.getElementById('eventForm');
+                if (form) form.reset();
+                toggleModal('eventModal', false);
+                
+                // Play sound and show confirmation
+                playSound('buttonClick');
+                alert('Event added successfully!');
+            }
+            
+            function deleteEvent(eventId) {
+                if (confirm('Are you sure you want to delete this event?')) {
+                    state.events = state.events.filter(event => event.id !== eventId);
+                    localStorage.setItem('events', JSON.stringify(state.events));
+                    renderEvents();
+                    renderCalendar();
+                    playSound('buttonClick');
+                }
+            }
+            
+            function editEvent(eventId) {
+                const event = state.events.find(e => e.id === eventId);
+                if (!event) return;
+                
+                const titleInput = document.getElementById('eventTitle');
+                const dateInput = document.getElementById('eventDate');
+                const timeInput = document.getElementById('eventTime');
+                const descInput = document.getElementById('eventDescription');
+                
+                if (titleInput) titleInput.value = event.title;
+                if (dateInput) dateInput.value = event.date;
+                if (timeInput) timeInput.value = event.time || '';
+                if (descInput) descInput.value = event.description || '';
+                
+                state.editingEvent = event;
+                toggleModal('eventModal', true);
+            }
+            
+            // Utility Functions
+            function updateStudyStats() {
+                const today = new Date().toDateString();
+                
+                if (state.lastStudyDate !== today) {
+                    state.streak++;
+                    state.lastStudyDate = today;
+                }
+                
+                state.studyTime += Math.floor(state.timerModes[state.timerMode] / 60);
+                
+                localStorage.setItem('studyTime', state.studyTime);
+                localStorage.setItem('streak', state.streak);
+                localStorage.setItem('lastStudyDate', state.lastStudyDate);
+                
+                updateDashboard();
+            }
+            
+            function playSound(sound) {
+                if (document.getElementById('soundToggle')?.checked) {
+                    sound.currentTime = 0;
+                    sound.play();
+                }
+            }
+            
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                const options = { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric',
+                    timeZone: 'Asia/Kolkata'
+                };
+                return date.toLocaleDateString('en-IN', options);
+            }
+            
+            function formatTime(seconds) {
+                if (isNaN(seconds)) return '0:00';
+                const minutes = Math.floor(seconds / 60);
+                seconds = Math.floor(seconds % 60);
+                return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            function setupProgressRing() {
+                const circle = document.querySelector('.progress-ring-circle');
+                if (circle) {
+                    const radius = circle.r.baseVal.value;
+                    const circumference = radius * 2 * Math.PI;
+                    
+                    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+                    circle.style.strokeDashoffset = circumference;
+                }
+            }
+            
+            function updateProgressRing(progress) {
+                const circle = document.querySelector('.progress-ring-circle');
+                if (circle) {
+                    const radius = circle.r.baseVal.value;
+                    const circumference = radius * 2 * Math.PI;
+                    const offset = circumference - (progress * circumference);
+                    circle.style.strokeDashoffset = offset;
+                }
+            }
+            
+            // Music player functions
+            function initializeMusicPlayer() {
+                console.log('Initializing music player...');
+                
+                if (!elements.musicFile || !elements.musicSelect) {
+                    console.error('Music player elements not found');
+                    return;
+                }
+            
+                // Set initial volume
+                if (elements.volumeSlider) {
+                    elements.volumeSlider.value = state.musicVolume;
+                    audio.volume = state.musicVolume / 100;
+                }
+            
+                // Handle file selection
+                elements.musicFile.addEventListener('change', (e) => {
+                    console.log('Files selected:', e.target.files);
+                    const files = Array.from(e.target.files);
+                    if (files.length > 0) {
+                        playlist = files;
+                        updatePlaylist();
+                        loadTrack(0);
+                        elements.musicSelect.classList.add('has-files');
+                    }
+                });
+            
+                // Update time displays
+                audio.addEventListener('timeupdate', () => {
+                    if (!elements.currentTime || !elements.duration || !elements.seekBar) return;
+                    
+                    const currentTime = formatTime(audio.currentTime);
+                    const duration = formatTime(audio.duration);
+                    elements.currentTime.textContent = currentTime;
+                    elements.duration.textContent = duration;
+                    
+                    if (!isNaN(audio.duration)) {
+                        elements.seekBar.value = (audio.currentTime / audio.duration) * 100;
+                    }
+                });
+            
+                // Add error handling for audio
+                audio.addEventListener('error', (e) => {
+                    console.error('Audio error:', e);
+                    if (audio.error) {
+                        console.error('Error code:', audio.error.code);
+                        console.error('Error message:', audio.error.message);
+                    }
+                    if (elements.nowPlaying) {
+                        elements.nowPlaying.textContent = 'Error playing track';
+                    }
+                });
+            
+                // Add loading indicator
+                audio.addEventListener('loadstart', () => {
+                    console.log('Loading track...');
+                    if (elements.nowPlaying) {
+                        elements.nowPlaying.textContent = 'Loading...';
+                    }
+                });
+            
+                audio.addEventListener('canplay', () => {
+                    console.log('Track can play now');
+                    if (currentTrack && elements.nowPlaying) {
+                        elements.nowPlaying.textContent = currentTrack.name;
+                    }
+                });
+            
+                // Seek functionality
+                if (elements.seekBar) {
+                    elements.seekBar.addEventListener('input', () => {
+                        if (!isNaN(audio.duration)) {
+                            const time = (elements.seekBar.value / 100) * audio.duration;
+                            audio.currentTime = time;
+                        }
+                    });
+                }
+            
+                // Music selection from playlist
+                if (elements.musicSelect) {
+                    elements.musicSelect.addEventListener('change', () => {
+                        const selectedIndex = elements.musicSelect.selectedIndex - 1; // -1 because of the placeholder option
+                        if (selectedIndex >= 0) {
+                            loadTrack(selectedIndex);
+                        }
+                    });
+                }
+            
+                // Play button
+                if (elements.playButton) {
+                    elements.playButton.addEventListener('click', () => {
+                        console.log('Play button clicked');
+                        playMusic();
+                    });
+                }
+                
+                // Pause button
+                if (elements.pauseButton) {
+                    elements.pauseButton.addEventListener('click', () => {
+                        console.log('Pause button clicked');
+                        pauseMusic();
+                    });
+                }
+            
+                // Previous track
+                if (elements.prevButton) {
+                    elements.prevButton.addEventListener('click', () => {
+                        if (currentTrack && playlist.length > 0) {
+                            const currentIndex = playlist.indexOf(currentTrack);
+                            const prevIndex = currentIndex > 0 ? currentIndex - 1 : playlist.length - 1;
+                            loadTrack(prevIndex);
+                        }
+                    });
+                }
+            
+                // Next track
+                if (elements.nextButton) {
+                    elements.nextButton.addEventListener('click', () => {
+                        if (currentTrack && playlist.length > 0) {
+                            const currentIndex = playlist.indexOf(currentTrack);
+                            const nextIndex = currentIndex < playlist.length - 1 ? currentIndex + 1 : 0;
+                            loadTrack(nextIndex);
+                        }
+                    });
+                }
+            
+                // Loop toggle
+                if (elements.loopButton) {
+                    elements.loopButton.addEventListener('click', () => {
+                        isLooping = !isLooping;
+                        audio.loop = isLooping;
+                        elements.loopButton.classList.toggle('active');
+                    });
+                }
+            
+                // Volume control
+                if (elements.volumeSlider) {
+                    elements.volumeSlider.addEventListener('input', () => {
+                        const volume = elements.volumeSlider.value;
+                        audio.volume = volume / 100;
+                        state.musicVolume = volume;
+                        localStorage.setItem('musicVolume', volume);
+                    });
+                }
+            
+                // Handle track ending
+                audio.addEventListener('ended', () => {
+                    if (!isLooping && playlist.length > 1 && elements.nextButton) {
+                        elements.nextButton.click();
+                    }
+                });
+            
+                console.log('Music player initialized');
+            }
+            
+            function updatePlaylist() {
+                if (!elements.musicSelect) return;
+                
+                // Clear existing options except the first one
+                while (elements.musicSelect.options.length > 1) {
+                    elements.musicSelect.remove(1);
+                }
+                
+                // Add new tracks to select
+                playlist.forEach((file, index) => {
+                    const option = new Option(file.name, index);
+                    elements.musicSelect.add(option);
+                });
+            }
+            
+            function loadTrack(index) {
+                if (index < 0 || index >= playlist.length) return;
+                
+                const file = playlist[index];
+                currentTrack = file;
+                
+                // Update now playing text
+                if (elements.nowPlaying) {
+                    elements.nowPlaying.textContent = 'Loading ' + file.name;
+                }
+                
+                // Update select value
+                if (elements.musicSelect) {
+                    elements.musicSelect.value = index;
+                }
+                
+                try {
+                    const fileUrl = URL.createObjectURL(file);
+                    audio.src = fileUrl;
+                    audio.load();
+                    playMusic();
+                    
+                    // Clean up the old URL when done
+                    audio.addEventListener('canplay', () => {
+                        URL.revokeObjectURL(fileUrl);
+                    }, { once: true });
+                } catch (error) {
+                    console.error('Error loading track:', error);
+                    if (elements.nowPlaying) {
+                        elements.nowPlaying.textContent = 'Error loading track';
+                    }
+                }
+            }
+            
+            function playMusic() {
+                console.log('Playing music...');
+                if (!audio.src) {
+                    console.log('No audio source set');
+                    return;
+                }
+            
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            console.log('Playback started successfully');
+                            if (elements.playButton) elements.playButton.classList.add('hidden');
+                            if (elements.pauseButton) elements.pauseButton.classList.remove('hidden');
+                            isPlaying = true;
+                        })
+                        .catch(error => {
+                            console.error('Error playing audio:', error);
+                            if (elements.nowPlaying) {
+                                elements.nowPlaying.textContent = 'Error playing track';
+                            }
+                        });
+                }
+            }
+            
+            function pauseMusic() {
+                console.log('Pausing music...');
+                audio.pause();
+                if (elements.pauseButton) elements.pauseButton.classList.add('hidden');
+                if (elements.playButton) elements.playButton.classList.remove('hidden');
+                isPlaying = false;
+            }
+            
+            // Initialize event handlers for modal cancel buttons
+            document.getElementById('cancelEvent').addEventListener('click', () => {
+                toggleModal('eventModal', false);
+            });
+            
+            // Request notification permission
+            if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+            
+            // Navigation
+            function initializeNavigation() {
+                const navButtons = document.querySelectorAll('.nav-btn');
+                navButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const pageId = btn.dataset.page;
+                        navigateTo(pageId);
+                        navButtons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    });
+                });
+            }
+            
+            function navigateTo(pageId) {
+                console.log(`Navigating to ${pageId}...`);
+                
+                // Validate pageId
+                const targetPage = document.getElementById(pageId);
+                if (!targetPage) {
+                    console.error(`Page ${pageId} not found!`);
+                    return;
+                }
+                
+                // Hide all pages
+                document.querySelectorAll('.page').forEach(page => {
+                    console.log(`Hiding page: ${page.id}`);
+                    page.classList.add('hidden');
+                });
+                
+                // Show selected page
+                console.log(`Showing page: ${pageId}`);
+                targetPage.classList.remove('hidden');
+                
+                // Update nav buttons
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.page === pageId) {
+                        btn.classList.add('active');
+                    }
+                });
+                
+                // Update state
+                state.currentPage = pageId;
+                
+                // Initialize page-specific content
+                console.log(`Initializing content for ${pageId}`);
+                switch (pageId) {
+                    case 'notesPage':
+                        console.log('Initializing notes...');
+                        initializeNotes();
+                        break;
+                    case 'calendarPage':
+                        console.log('Initializing calendar...');
+                        renderCalendar();
+                        break;
+                    case 'tasksPage':
+                        console.log('Initializing tasks...');
+                        renderTasks();
+                        break;
+                    case 'homePage':
+                        console.log('Initializing dashboard...');
+                        updateDashboard();
+                        break;
+                }
+                
+                console.log(`Navigation to ${pageId} complete`);
+            }
+            
+            // Task Management
+            function renderTasks(filter = 'all') {
+                const todoList = document.getElementById('todoList');
+                const inProgressList = document.getElementById('inProgressList');
+                const completedList = document.getElementById('completedList');
+            
+                const filteredTasks = state.tasks.filter(task => 
+                    filter === 'all' || task.type === filter
+                );
+            
+                const todoTasks = filteredTasks.filter(t => t.status === 'todo');
+                const inProgressTasks = filteredTasks.filter(t => t.status === 'inProgress');
+                const completedTasks = filteredTasks.filter(t => t.status === 'completed');
+            
+                todoList.innerHTML = todoTasks.map(task => createTaskElement(task)).join('');
+                inProgressList.innerHTML = inProgressTasks.map(task => createTaskElement(task)).join('');
+                completedList.innerHTML = completedTasks.map(task => createTaskElement(task)).join('');
+            
+                initializeTaskDragAndDrop();
+            }
+            
+            // Notes Management
+            function selectNote(noteId) {
+                state.currentNote = state.notes.find(note => note.id === noteId);
+                elements.noteEditor.innerHTML = state.currentNote.content;
+                renderNotesList();
+            }
+            
+            // Calendar Functions
+            function navigateMonth(direction) {
+                state.currentMonth += direction;
+                
+                if (state.currentMonth > 11) {
+                    state.currentMonth = 0;
+                    state.currentYear++;
+                } else if (state.currentMonth < 0) {
+                    state.currentMonth = 11;
+                    state.currentYear--;
+                }
+                
+                renderCalendar();
+                renderEvents();
+                playSound('buttonClick');
+            }
+            
+            // Dashboard
+            function updateDashboard() {
+                const today = new Date().toISOString().split('T')[0];
+                
+                // Update tasks due today
+                const tasksToday = state.tasks.filter(task => task.dueDate === today).length;
+                document.getElementById('todayTaskCount').textContent = tasksToday;
+            
+                // Update study time
+                const studyTimeToday = calculateStudyTimeToday();
+                document.getElementById('todayStudyTime').textContent = 
+                    `${Math.floor(studyTimeToday / 60)}h ${studyTimeToday % 60}m`;
+            
+                // Update upcoming events
+                const upcomingList = document.getElementById('upcomingList');
+                const upcomingEvents = getUpcomingEvents();
+                upcomingList.innerHTML = upcomingEvents.map(event => `
+                    <div class="upcoming-event">
+                        <div class="event-date">${formatDate(event.date)}</div>
+                        <div class="event-title">${event.title}</div>
+                    </div>
+                `).join('');
+            }
+            
+            function calculateStudyTimeToday() {
+                const today = new Date().toDateString();
+                
+                if (state.lastStudyDate !== today) {
+                    state.streak++;
+                    state.lastStudyDate = today;
+                }
+                
+                state.studyTime += Math.floor(state.timerModes[state.timerMode] / 60);
+                
+                localStorage.setItem('studyTime', state.studyTime);
+                localStorage.setItem('streak', state.streak);
+                localStorage.setItem('lastStudyDate', state.lastStudyDate);
+                
+                return state.studyTime;
+            }
+            
+            function getUpcomingEvents() {
+                const today = new Date();
+                return state.events.filter(event => {
+                    const eventDate = new Date(event.date);
+                    return eventDate > today;
+                });
+            }
+            
+            // Local Storage
+            function saveTasks() {
+                localStorage.setItem('tasks', JSON.stringify(state.tasks));
+            }
+            
+            function saveNotes() {
+                localStorage.setItem('notes', JSON.stringify(state.notes));
+            }
+            
+            function saveEvents() {
+                localStorage.setItem('events', JSON.stringify(state.events));
+            }
+            
+            // Missing functions
+            function handleDragStart(e) {
+                e.target.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', e.target.dataset.taskId);
+            }
+            
+            function handleDragEnd(e) {
+                e.target.classList.remove('dragging');
+            }
+            
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            }
+            
+            function handleDrop(e) {
+                e.preventDefault();
+                const taskId = parseInt(e.dataTransfer.getData('text/plain'));
+                const task = state.tasks.find(t => t.id === taskId);
+                const newStatus = e.currentTarget.id.replace('List', '');
+                
+                if (task && newStatus) {
+                    task.status = newStatus;
+                    saveTasks();
+                    renderTasks();
+                }
+            }
+            
+            function initializeSubjects() {
+                const addSubjectBtn = document.getElementById('addSubjectBtn');
+                const subjectForm = document.getElementById('subjectForm');
+                const cancelSubject = document.getElementById('cancelSubject');
+            
+                addSubjectBtn.addEventListener('click', () => toggleModal('subjectModal', true));
+                cancelSubject.addEventListener('click', () => toggleModal('subjectModal', false));
+            
+                subjectForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const subject = {
+                        id: Date.now(),
+                        name: document.getElementById('subjectName').value,
+                        color: document.getElementById('subjectColor').value
+                    };
+                    state.subjects.push(subject);
+                    localStorage.setItem('subjects', JSON.stringify(state.subjects));
+                    updateSubjectSelect();
+                    toggleModal('subjectModal', false);
+                    subjectForm.reset();
+                });
+            
+                updateSubjectSelect();
+            }
+            
+            function updateSubjectSelect() {
+                const select = document.getElementById('subjectSelect');
+                select.innerHTML = '<option value="">Select Subject</option>' +
+                    state.subjects.map(subject => 
+                        `<option value="${subject.id}">${subject.name}</option>`
+                    ).join('');
+            }
+            
+            function searchNotesHandler(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredNotes = state.notes.filter(note => 
+                    note.title.toLowerCase().includes(searchTerm) || 
+                    note.content.toLowerCase().includes(searchTerm)
+                );
+                renderNotesList(filteredNotes);
+            }
+            
+            function filterTasks(filter) {
+                renderTasks(filter);
+            }
+            
+            function editTask(taskId) {
+                const task = state.tasks.find(t => t.id === taskId);
+                if (task) {
+                    document.getElementById('taskTitle').value = task.title;
+                    document.getElementById('taskDescription').value = task.description;
+                    document.getElementById('taskType').value = task.type;
+                    document.getElementById('taskDueDate').value = task.dueDate;
+                    document.getElementById('taskDueTime').value = task.dueTime;
+                    document.getElementById('taskPriority').value = task.priority;
+                    
+                    state.editingTask = task;
+                    toggleModal('taskModal', true);
+                }
+            }
+            
+            function deleteTask(taskId) {
+                if (confirm('Are you sure you want to delete this task?')) {
+                    state.tasks = state.tasks.filter(t => t.id !== taskId);
+                    saveTasks();
+                    renderTasks();
+                    updateDashboard();
+                }
+            }
+            
+            function updateTimerDisplay() {
+                const minutes = Math.floor(state.timeLeft / 60);
+                const seconds = state.timeLeft % 60;
+                const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                const timerDisplay = document.getElementById('timer');
+                if (timerDisplay) {
+                    timerDisplay.textContent = display;
+                }
+            }
+            
+            function adjustTime(minutes) {
+                if (!state.isTimerRunning) {
+                    const newTime = state.timeLeft + (minutes * 60);
+                    if (newTime >= 60 && newTime <= 3600) { // Between 1 minute and 1 hour
+                        state.timeLeft = newTime;
+                        updateTimerDisplay();
+                        playSound('buttonClick');
+                    }
+                }
+            }
+            
+            function setupProgressRing() {
+                const circle = document.querySelector('.progress-ring-circle');
+                if (circle) {
+                    const radius = circle.r.baseVal.value;
+                    const circumference = radius * 2 * Math.PI;
+                    
+                    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+                    circle.style.strokeDashoffset = circumference;
+                }
+            }
+            
+            function updateProgressRing(progress) {
+                const circle = document.querySelector('.progress-ring-circle');
+                if (circle) {
+                    const radius = circle.r.baseVal.value;
+                    const circumference = radius * 2 * Math.PI;
+                    const offset = circumference - (progress * circumference);
+                    circle.style.strokeDashoffset = offset;
+                }
+            }
+            </script>
+    </div>
+</body>
+</html>
